@@ -1,5 +1,5 @@
 {
-  "version": "1.3.1",
+  "version": "1.4.0",
   "released": "2026-08-16",
-  "notes": "Option 4 is now the official app icon."
+  "notes": "Mobile Dashboard Option 1, corrected phone spacing, prominent AM/PM weight, and Line/Area/Combined graph views."
 }
