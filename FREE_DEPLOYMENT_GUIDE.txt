@@ -1,0 +1,42 @@
+DREWS NUTRITION TRACKER — FREE DEPLOYMENT GUIDE
+
+WHAT IS ALREADY PREPARED
+- Installable PWA manifest and icons
+- Offline service worker
+- Local meal/weight/history storage
+- Full JSON backup + restore
+- CSV history export
+- Rolling local safety snapshots
+- GitHub Pages compatibility (.nojekyll + 404.html)
+- Netlify headers/config
+- Cloudflare static-hosting config
+- Meal and motivational image assets
+
+EASIEST FREE OPTION: NETLIFY DROP
+1. Unzip this package.
+2. Sign in to Netlify.
+3. Use the manual/drag-and-drop deployment screen.
+4. Drag the entire unzipped folder into the deploy area.
+5. Netlify gives you an HTTPS URL.
+6. Open that URL on your phone and use the app's Backup & Install page to install it.
+
+GITHUB PAGES
+1. Create a GitHub Free account/repository.
+2. Upload every file from this folder to the repository root.
+3. In Repository Settings > Pages, publish from the main branch/root.
+4. Open the HTTPS Pages URL after GitHub finishes publishing.
+Note: GitHub Pages is available with GitHub Free for public repositories. If you do not want the app source public, use another host.
+
+CLOUDFLARE
+This is a static HTML/PWA project and is ready for Cloudflare static hosting.
+Upload this folder as a static project or connect a Git repository. No server-side functions are needed.
+
+IMPORTANT DATA NOTE
+Hosting makes the app URL durable and enables install/offline behavior, but it does NOT yet sync your nutrition data between devices.
+Data still lives in each browser/device. Keep JSON backups until cloud database sync is added.
+
+BACKUP HABIT
+A good zero-cost routine is:
+- Export a full JSON backup weekly.
+- Export another before changing phones/browsers.
+- Keep at least one copy outside the phone (Drive, computer, etc.).
