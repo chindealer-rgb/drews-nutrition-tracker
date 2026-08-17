@@ -336,7 +336,7 @@ input:focus,select:focus{border-color:var(--orange)}
 .custom-remove:hover{color:#ffb0b0}
 
 
-/* v1.4.2 — Mobile Option 1: Bold & Modern */
+/* v1.5.0 — Mobile Option 1: Bold & Modern */
 .mobile-weight-summary{display:none}
 .graph-view-controls{
   display:flex;gap:7px;overflow-x:auto;padding-bottom:3px;margin-bottom:12px;
@@ -450,6 +450,72 @@ input:focus,select:focus{border-color:var(--orange)}
 .progress-chart-wrap{position:relative}
 @media(min-width:781px){.weight-modal{align-items:center}}
 
+
+/* v1.5.0 — Food Library + Custom Food Manager + Top 10 Insights */
+.library-toolbar{
+  display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:8px;margin-bottom:12px
+}
+.library-tabs,.insight-tabs{display:flex;gap:7px;overflow-x:auto;scrollbar-width:none;margin-bottom:12px}
+.library-tabs::-webkit-scrollbar,.insight-tabs::-webkit-scrollbar{display:none}
+.library-tabs button,.insight-tabs button{
+  white-space:nowrap;background:#111820;border:1px solid #29343f;color:#cfd6de;
+  padding:9px 12px;border-radius:9px;font-weight:850
+}
+.library-tabs button.active,.insight-tabs button.active{background:var(--orange);border-color:var(--orange);color:#fff}
+.library-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.library-card{
+  border:1px solid #202a34;background:#0b1015;border-radius:13px;padding:10px;display:flex;gap:10px;align-items:center
+}
+.library-card img{width:58px;height:58px;object-fit:cover;border-radius:10px;border:1px solid #303943;background:#10161c;flex:0 0 auto}
+.library-card .lib-name{font-size:13px;font-weight:850;line-height:1.2}
+.library-card .lib-macros{font-size:10px;color:#98a4b0;margin-top:4px;line-height:1.45}
+.library-card .lib-actions{margin-left:auto;display:flex;flex-direction:column;gap:5px}
+.library-card .lib-actions button{font-size:10px;padding:6px 8px}
+.custom-manager-grid{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);gap:14px}
+.custom-list-row{
+  display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center;
+  border:1px solid #202a34;background:#0b1015;border-radius:12px;padding:10px;margin-bottom:8px
+}
+.custom-list-row .name{font-weight:850;font-size:13px}
+.custom-list-row .meta{font-size:10px;color:#97a3af;margin-top:3px}
+.custom-list-actions{display:flex;gap:6px}
+.custom-list-actions button{padding:6px 8px;font-size:10px}
+.insights-top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
+.insights-top select{max-width:150px}
+.topfoods-list{display:flex;flex-direction:column;gap:8px}
+.topfood-row{
+  display:grid;grid-template-columns:34px 54px minmax(0,1fr) auto;gap:9px;align-items:center;
+  border:1px solid #202a34;background:#0b1015;border-radius:13px;padding:9px
+}
+.rank-badge{
+  width:30px;height:30px;border-radius:9px;background:#151d26;color:var(--orange);
+  display:grid;place-items:center;font-weight:1000
+}
+.topfood-row img{width:52px;height:52px;object-fit:cover;border-radius:9px;border:1px solid #303943;background:#10161c}
+.topfood-name{font-size:13px;font-weight:900}
+.topfood-meta{font-size:10px;color:#98a4b0;margin-top:3px}
+.nutrient-tag{
+  font-size:9px;font-weight:900;padding:5px 7px;border-radius:999px;border:1px solid currentColor;white-space:nowrap
+}
+.tag-protein{color:#5be02b}.tag-carbs{color:#168cff}.tag-fat{color:#9f3cff}.tag-calories{color:#ff6a00}
+.insight-summary{
+  display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px
+}
+.insight-box{border:1px solid #202a34;background:#0b1015;border-radius:11px;padding:10px;text-align:center}
+.insight-box b{display:block;font-size:17px}.insight-box span{font-size:9px;color:#8f9aa7}
+.custom-edit-grid{display:grid;grid-template-columns:2fr repeat(4,1fr);gap:7px}
+@media(max-width:780px){
+  .library-toolbar{grid-template-columns:1fr auto}
+  .library-toolbar select:last-child{display:none}
+  .library-grid{grid-template-columns:1fr}
+  .custom-manager-grid{grid-template-columns:1fr}
+  .topfood-row{grid-template-columns:30px 50px minmax(0,1fr)}
+  .topfood-row .nutrient-tag{grid-column:3;justify-self:start}
+  .insight-summary{grid-template-columns:repeat(2,1fr)}
+  .custom-edit-grid{grid-template-columns:1fr 1fr}
+  .custom-edit-grid input:first-child{grid-column:1/-1}
+}
+
 </style>
 
 <link rel="manifest" href="manifest.webmanifest">
@@ -478,6 +544,9 @@ input:focus,select:focus{border-color:var(--orange)}
       <button data-tab="calendar" onclick="showTab('calendar',this)">Calendar</button>
       <button data-tab="progress" onclick="showTab('progress',this)">Progress</button>
       <button data-tab="history" onclick="showTab('history',this)">History</button>
+      <button data-tab="foods" onclick="showTab('foods',this)">Food Library</button>
+      <button data-tab="customfoods" onclick="showTab('customfoods',this)">Custom Foods</button>
+      <button data-tab="insights" onclick="showTab('insights',this)">Food Insights</button>
       <button data-tab="backup" onclick="showTab('backup',this)">Backup & Install</button>
     </div>
 
@@ -497,7 +566,7 @@ input:focus,select:focus{border-color:var(--orange)}
         <div class="date-title">
           <h1 id="headerTitle">TODAY</h1>
           <div class="date-sub" id="headerDate"></div>
-          <div class="small" style="margin-top:4px">Drews Nutrition Tracker <span id="appVersion">v1.4.2</span></div>
+          <div class="small" style="margin-top:4px">Drews Nutrition Tracker <span id="appVersion">v1.5.0</span></div>
         </div>
         <button class="icon-btn" onclick="changeDay(1)">›</button>
       </div>
@@ -573,7 +642,7 @@ input:focus,select:focus{border-color:var(--orange)}
           </div>
           <div id="mealList"></div>
 
-          <div class="custom-box">
+          <div class="custom-box" style="display:none">
             <div class="card-title"><h3>ADD CUSTOM FOOD</h3></div>
             <div class="formgrid">
               <input id="newName" type="text" placeholder="Food name">
@@ -682,6 +751,86 @@ input:focus,select:focus{border-color:var(--orange)}
       </div>
     </section>
 
+
+    <section id="foods" class="panel">
+      <div class="card">
+        <div class="card-title">
+          <h2>FOODS & SNACKS</h2>
+          <button class="primary-btn" onclick="showTab('customfoods',document.querySelector('[data-tab=&quot;customfoods&quot;]'))">+ Custom Food</button>
+        </div>
+        <div class="library-tabs" id="libraryTabs">
+          <button class="active" onclick="setLibraryCategory('All',this)">All Foods</button>
+          <button onclick="setLibraryCategory('Meals',this)">Meals</button>
+          <button onclick="setLibraryCategory('Sides',this)">Sides</button>
+          <button onclick="setLibraryCategory('Breakfast / Snacks',this)">Snacks</button>
+          <button onclick="setLibraryCategory('Supplements',this)">Supplements</button>
+          <button onclick="setLibraryCategory('Custom',this)">Custom</button>
+        </div>
+        <div class="library-toolbar">
+          <input id="foodSearch" type="text" placeholder="Search foods..." oninput="renderFoodLibrary()">
+          <select id="librarySort" onchange="renderFoodLibrary()">
+            <option value="az">A–Z</option>
+            <option value="protein">Protein high → low</option>
+            <option value="cal">Calories high → low</option>
+          </select>
+          <select id="libraryFilter" onchange="renderFoodLibrary()">
+            <option value="all">All</option>
+            <option value="protein">High protein</option>
+            <option value="carbs">High carbs</option>
+            <option value="fat">High fat</option>
+          </select>
+        </div>
+        <div class="library-grid" id="foodLibraryGrid"></div>
+      </div>
+    </section>
+
+    <section id="customfoods" class="panel">
+      <div class="custom-manager-grid">
+        <div class="card">
+          <div class="card-title"><h2>MY CUSTOM FOODS</h2><span class="mini-link">Manage your foods</span></div>
+          <div id="customFoodList"></div>
+        </div>
+        <div class="card">
+          <div class="card-title"><h2 id="customEditorTitle">CREATE CUSTOM FOOD</h2></div>
+          <input type="hidden" id="editCustomId">
+          <div class="custom-edit-grid">
+            <input id="manageName" type="text" placeholder="Food name">
+            <input id="manageCal" type="number" placeholder="Calories">
+            <input id="managePro" type="number" placeholder="Protein">
+            <input id="manageCarb" type="number" placeholder="Carbs">
+            <input id="manageFat" type="number" placeholder="Fat">
+          </div>
+          <input id="manageServing" type="text" placeholder="Serving description (example: 1 cup)" style="margin-top:7px">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:9px">
+            <button class="dark-btn" onclick="resetCustomEditor()">Clear</button>
+            <button class="primary-btn" onclick="saveManagedCustomFood()">Save Food</button>
+          </div>
+          <div class="small" style="margin-top:10px;line-height:1.5">
+            Custom foods automatically appear in the Food Library and your daily checklist.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="insights" class="panel">
+      <div class="card">
+        <div class="insights-top">
+          <div>
+            <h2 style="margin:0">TOP 10 FOODS</h2>
+            <div class="small" style="margin-top:4px">Your most frequently logged foods and what they contribute.</div>
+          </div>
+          <select id="insightRange" onchange="renderFoodInsights()">
+            <option value="7">7 Days</option>
+            <option value="30" selected>30 Days</option>
+            <option value="90">90 Days</option>
+            <option value="365">1 Year</option>
+          </select>
+        </div>
+        <div class="topfoods-list" id="topFoodsList"></div>
+        <div class="insight-summary" id="insightSummary"></div>
+      </div>
+    </section>
+
     <section id="backup" class="panel">
       <div class="card" style="max-width:900px">
         <div class="card-title"><h2>BACKUP & RESTORE</h2><span class="mini-link">Protect your history</span></div>
@@ -766,16 +915,16 @@ input:focus,select:focus{border-color:var(--orange)}
 </div>
 
 <div class="mobile-nav">
-  <button class="active" data-tab="log" onclick="showTab('log',this)">Today</button>
-  <button data-tab="calendar" onclick="showTab('calendar',this)">Calendar</button>
+  <button class="active" data-tab="log" onclick="showTab('log',this)">Dashboard</button>
+  <button data-tab="foods" onclick="showTab('foods',this)">Foods</button>
   <button data-tab="progress" onclick="showTab('progress',this)">Progress</button>
-  <button data-tab="history" onclick="showTab('history',this)">History</button>
-  <button data-tab="backup" onclick="showTab('backup',this)">Backup</button>
+  <button data-tab="insights" onclick="showTab('insights',this)">Insights</button>
+  <button data-tab="customfoods" onclick="showTab('customfoods',this)">More</button>
 </div>
 
 <script>
 
-const APP_VERSION = '1.4.2';
+const APP_VERSION = '1.5.0';
 const builtInFoodImages = {
   eggs3toast:'./food-eggs3toast.jpg',
   groundchickenrice:'./food-groundchickenrice.jpg',
@@ -850,7 +999,7 @@ let weights=JSON.parse(localStorage.getItem('drewsWeightsV1')||'null')
   ||{};
 
 let nightWeights=JSON.parse(localStorage.getItem('drewsNightWeightsV1')||'{}');
-let activeDate=todayKey(), calendarCursor=new Date(), selectedMetric='weight', rangeDays=7, graphView='line';
+let activeDate=todayKey(), calendarCursor=new Date(), selectedMetric='weight', rangeDays=7, graphView='line', libraryCategory='All';
 let progressChart=null, miniWeightChart=null, miniProgressChart=null, mobileWeightChart=null;
 
 function todayKey(){return new Date().toLocaleDateString('en-CA')}
@@ -892,6 +1041,9 @@ function showTab(id,btn){
   if(id==='calendar')renderCalendar();
   if(id==='history')renderHistory();
   if(id==='progress')renderProgress();
+  if(id==='foods')renderFoodLibrary();
+  if(id==='customfoods')renderCustomFoodManager();
+  if(id==='insights')renderFoodInsights();
   if(id==='backup'){
     renderLastBackupStatus();
     const s = JSON.parse(localStorage.getItem('drewsSnapshotsV1') || '[]');
@@ -1086,22 +1238,187 @@ function editGoals(){
   goals={cal:+c||goals.cal,p:+p||goals.p,c:+cc||goals.c,f:+f||goals.f};save();renderLog()
 }
 function addCustom(){
-  const name=newName.value.trim();if(!name){alert('Enter a food name.');return}
-  items.push({id:'custom_'+Date.now(),cat:'Custom',name,serv:'1 serving',cal:+newCal.value||0,p:+newPro.value||0,c:+newCarb.value||0,f:+newFat.value||0});
-  [newName,newCal,newPro,newCarb,newFat].forEach(x=>x.value='');save();renderLog()
-}
-function deleteCustomFood(id){
-  const item=items.find(i=>i.id===id);
-  if(!item || !id.startsWith('custom_')) return;
-  if(!confirm(`Remove custom food "${item.name}"? This will also remove its saved check-state from past days.`)) return;
-  items=items.filter(i=>i.id!==id);
-  Object.keys(history).forEach(k=>{
-    if(history[k] && history[k][id]) delete history[k][id];
-  });
-  save();
-  renderLog();
+  showTab('customfoods',document.querySelector('[data-tab="customfoods"]'));
 }
 
+
+
+
+function setLibraryCategory(cat,btn){
+  libraryCategory=cat;
+  document.querySelectorAll('#libraryTabs button').forEach(b=>b.classList.remove('active'));
+  if(btn)btn.classList.add('active');
+  renderFoodLibrary();
+}
+function nutrientProfile(item){
+  const scores={
+    protein:Number(item.p)||0,
+    carbs:Number(item.c)||0,
+    fat:(Number(item.f)||0)*2.25,
+    calories:(Number(item.cal)||0)/20
+  };
+  const maxKey=Object.keys(scores).sort((a,b)=>scores[b]-scores[a])[0]||'calories';
+  return maxKey;
+}
+function nutrientLabel(item){
+  const n=nutrientProfile(item);
+  return {protein:'High Protein',carbs:'High Carbs',fat:'High Fat',calories:'High Calories'}[n];
+}
+function tagClass(item){return 'tag-'+nutrientProfile(item);}
+function renderFoodLibrary(){
+  const grid=document.getElementById('foodLibraryGrid');if(!grid)return;
+  const q=(document.getElementById('foodSearch')?.value||'').trim().toLowerCase();
+  const sort=document.getElementById('librarySort')?.value||'az';
+  const filter=document.getElementById('libraryFilter')?.value||'all';
+
+  let list=items.filter(i=>{
+    const isCustom=i.id.startsWith('custom_');
+    if(libraryCategory==='Custom'&&!isCustom)return false;
+    if(libraryCategory!=='All'&&libraryCategory!=='Custom'&&i.cat!==libraryCategory)return false;
+    if(q&&!`${i.name} ${i.serv||''}`.toLowerCase().includes(q))return false;
+    if(filter!=='all'&&nutrientProfile(i)!==filter)return false;
+    return true;
+  });
+
+  if(sort==='protein')list.sort((a,b)=>(b.p||0)-(a.p||0));
+  else if(sort==='cal')list.sort((a,b)=>(b.cal||0)-(a.cal||0));
+  else list.sort((a,b)=>a.name.localeCompare(b.name));
+
+  if(!list.length){grid.innerHTML='<div class="small" style="padding:20px;text-align:center">No foods match this filter.</div>';return;}
+  grid.innerHTML=list.map(item=>{
+    const img=foodImageFor(item);
+    const custom=item.id.startsWith('custom_');
+    return `<div class="library-card">
+      ${img?`<img src="${img}" alt="${item.name}" onerror="this.style.display='none'">`:`<div style="width:58px;height:58px;border-radius:10px;background:#151d26;display:grid;place-items:center;font-size:22px">🍽</div>`}
+      <div style="min-width:0">
+        <div class="lib-name">${item.name}</div>
+        <div class="lib-macros">${Math.round(item.cal)} cal • ${item.p}g P • ${item.c}g C • ${item.f}g F<br>${item.serv||'1 serving'}</div>
+      </div>
+      <div class="lib-actions">
+        <button class="dark-btn" onclick="quickToggleFood('${item.id}')">Log</button>
+        ${custom?`<button class="dark-btn" onclick="editCustomFood('${item.id}')">Edit</button>`:''}
+      </div>
+    </div>`;
+  }).join('');
+}
+function quickToggleFood(id){
+  const day=getDay(activeDate),state=day[id]||{checked:false,qty:1};
+  state.checked=true;
+  day[id]=state;
+  save();
+  renderLog();
+  const btn=document.querySelector('[data-tab="log"]');
+  showTab('log',btn);
+}
+function renderCustomFoodManager(){
+  const box=document.getElementById('customFoodList');if(!box)return;
+  const custom=items.filter(i=>i.id.startsWith('custom_')).sort((a,b)=>a.name.localeCompare(b.name));
+  if(!custom.length){box.innerHTML='<div class="small" style="padding:20px;text-align:center">No custom foods yet. Create your first one.</div>';return;}
+  box.innerHTML=custom.map(i=>`<div class="custom-list-row">
+    <div><div class="name">${i.name}</div><div class="meta">${Math.round(i.cal)} cal • ${i.p}g P • ${i.c}g C • ${i.f}g F • ${i.serv||'1 serving'}</div></div>
+    <div class="custom-list-actions">
+      <button class="dark-btn" onclick="editCustomFood('${i.id}')">Edit</button>
+      <button class="danger-btn" onclick="deleteCustomFood('${i.id}')">Delete</button>
+    </div>
+  </div>`).join('');
+}
+function resetCustomEditor(){
+  document.getElementById('editCustomId').value='';
+  document.getElementById('customEditorTitle').textContent='CREATE CUSTOM FOOD';
+  ['manageName','manageCal','managePro','manageCarb','manageFat','manageServing'].forEach(id=>document.getElementById(id).value='');
+}
+function editCustomFood(id){
+  const item=items.find(i=>i.id===id&&i.id.startsWith('custom_'));if(!item)return;
+  showTab('customfoods',document.querySelector('[data-tab="customfoods"]'));
+  document.getElementById('editCustomId').value=id;
+  document.getElementById('customEditorTitle').textContent='EDIT CUSTOM FOOD';
+  document.getElementById('manageName').value=item.name||'';
+  document.getElementById('manageCal').value=item.cal??'';
+  document.getElementById('managePro').value=item.p??'';
+  document.getElementById('manageCarb').value=item.c??'';
+  document.getElementById('manageFat').value=item.f??'';
+  document.getElementById('manageServing').value=item.serv||'1 serving';
+}
+function saveManagedCustomFood(){
+  const name=document.getElementById('manageName').value.trim();
+  if(!name){alert('Enter a food name.');return;}
+  const id=document.getElementById('editCustomId').value;
+  const payload={
+    name,cat:'Custom',
+    serv:document.getElementById('manageServing').value.trim()||'1 serving',
+    cal:+document.getElementById('manageCal').value||0,
+    p:+document.getElementById('managePro').value||0,
+    c:+document.getElementById('manageCarb').value||0,
+    f:+document.getElementById('manageFat').value||0
+  };
+  if(id){
+    const item=items.find(i=>i.id===id);
+    if(item)Object.assign(item,payload);
+  }else items.push({id:'custom_'+Date.now(),...payload});
+  save();resetCustomEditor();renderCustomFoodManager();renderLog();
+}
+function deleteCustomFood(id){
+  const item=items.find(i=>i.id===id&&i.id.startsWith('custom_'));if(!item)return;
+  if(!confirm(`Delete "${item.name}"? This also removes this food from previous daily logs.`))return;
+  items=items.filter(i=>i.id!==id);
+  Object.keys(history).forEach(k=>{if(history[k]?.[id])delete history[k][id];});
+  save();resetCustomEditor();renderCustomFoodManager();renderLog();
+}
+function insightDateKeys(days){
+  const out=[],d=new Date();
+  for(let i=days-1;i>=0;i--){const x=new Date(d);x.setDate(d.getDate()-i);out.push(dateKey(x));}
+  return out;
+}
+function buildFoodStats(days){
+  const keys=insightDateKeys(days), stats={};
+  keys.forEach(k=>{
+    const day=history[k]||{};
+    Object.entries(day).forEach(([id,state])=>{
+      if(!state?.checked)return;
+      const item=items.find(i=>i.id===id);if(!item)return;
+      const q=state.qty||1;
+      if(!stats[id])stats[id]={item,count:0,cal:0,p:0,c:0,f:0};
+      stats[id].count+=q;
+      stats[id].cal+=(item.cal||0)*q;
+      stats[id].p+=(item.p||0)*q;
+      stats[id].c+=(item.c||0)*q;
+      stats[id].f+=(item.f||0)*q;
+    });
+  });
+  return Object.values(stats).sort((a,b)=>b.count-a.count||b.cal-a.cal);
+}
+function renderFoodInsights(){
+  const list=document.getElementById('topFoodsList'),summary=document.getElementById('insightSummary');if(!list||!summary)return;
+  const days=+(document.getElementById('insightRange')?.value||30);
+  const stats=buildFoodStats(days),top=stats.slice(0,10);
+
+  if(!top.length){
+    list.innerHTML='<div class="small" style="padding:24px;text-align:center">Log foods for a few days and your Top 10 will appear here.</div>';
+    summary.innerHTML='';
+    return;
+  }
+
+  list.innerHTML=top.map((s,idx)=>{
+    const item=s.item,img=foodImageFor(item);
+    const dominant=nutrientProfile(item);
+    return `<div class="topfood-row">
+      <div class="rank-badge">${idx+1}</div>
+      ${img?`<img src="${img}" alt="${item.name}" onerror="this.style.display='none'">`:`<div style="width:52px;height:52px;border-radius:9px;background:#151d26;display:grid;place-items:center">🍽</div>`}
+      <div>
+        <div class="topfood-name">${item.name}</div>
+        <div class="topfood-meta">Logged ${s.count} time${s.count===1?'':'s'} • ${Math.round(s.cal)} cal • ${Math.round(s.p)}g P • ${Math.round(s.c)}g C • ${Math.round(s.f)}g F</div>
+      </div>
+      <span class="nutrient-tag tag-${dominant}">${nutrientLabel(item)}</span>
+    </div>`;
+  }).join('');
+
+  const totals=top.reduce((a,s)=>({count:a.count+s.count,cal:a.cal+s.cal,p:a.p+s.p,c:a.c+s.c,f:a.f+s.f}),{count:0,cal:0,p:0,c:0,f:0});
+  summary.innerHTML=`
+    <div class="insight-box"><b>${totals.count}</b><span>TOP-10 LOGS</span></div>
+    <div class="insight-box"><b>${Math.round(totals.p)}g</b><span>PROTEIN</span></div>
+    <div class="insight-box"><b>${Math.round(totals.c)}g</b><span>CARBS</span></div>
+    <div class="insight-box"><b>${Math.round(totals.f)}g</b><span>FATS</span></div>`;
+}
 
 function changeMonth(delta){calendarCursor.setMonth(calendarCursor.getMonth()+delta);renderCalendar()}
 function renderCalendar(){

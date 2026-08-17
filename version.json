@@ -1,5 +1,5 @@
 {
-  "version": "1.4.2",
-  "released": "2026-08-16",
-  "notes": "Fixes AM/PM weight logging and rebuilds Line, Area, and Weight + Calories graph views."
+  "version": "1.5.0",
+  "released": "2026-08-17",
+  "notes": "Adds Food Library, dedicated Custom Foods management, and Top 10 Foods insights based on actual logging history."
 }
