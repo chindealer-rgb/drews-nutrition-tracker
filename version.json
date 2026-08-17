@@ -1,5 +1,5 @@
 {
-  "version": "1.4.0",
+  "version": "1.4.2",
   "released": "2026-08-16",
-  "notes": "Mobile Dashboard Option 1, corrected phone spacing, prominent AM/PM weight, and Line/Area/Combined graph views."
+  "notes": "Fixes AM/PM weight logging and rebuilds Line, Area, and Weight + Calories graph views."
 }

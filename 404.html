@@ -336,7 +336,7 @@ input:focus,select:focus{border-color:var(--orange)}
 .custom-remove:hover{color:#ffb0b0}
 
 
-/* v1.4.0 — Mobile Option 1: Bold & Modern */
+/* v1.4.2 — Mobile Option 1: Bold & Modern */
 .mobile-weight-summary{display:none}
 .graph-view-controls{
   display:flex;gap:7px;overflow-x:auto;padding-bottom:3px;margin-bottom:12px;
@@ -437,6 +437,19 @@ input:focus,select:focus{border-color:var(--orange)}
   #progress .card-title h2{font-size:15px}
 }
 
+
+.weight-modal{position:fixed;inset:0;z-index:220;display:none;align-items:flex-end;justify-content:center;background:rgba(0,0,0,.74);backdrop-filter:blur(7px);padding:12px}
+.weight-modal.open{display:flex}
+.weight-modal-card{width:min(520px,100%);background:linear-gradient(155deg,#0b1015,#111820);border:1px solid #303a45;border-radius:18px;padding:16px;box-shadow:0 24px 70px rgba(0,0,0,.55)}
+.weight-modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.weight-modal-head h3{margin:0;font-size:17px}.weight-modal-close{width:34px;height:34px;border-radius:50%;border:1px solid #303a45;background:#111820;color:#fff}
+.weight-modal-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.weight-modal-grid label{font-size:10px;color:#9ba6b1;font-weight:850;display:block;margin-bottom:5px}
+.weight-modal-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+.graph-empty{display:none;position:absolute;inset:0;align-items:center;justify-content:center;text-align:center;color:#8f9aa7;font-size:12px;padding:30px;pointer-events:none}
+.progress-chart-wrap{position:relative}
+@media(min-width:781px){.weight-modal{align-items:center}}
+
 </style>
 
 <link rel="manifest" href="manifest.webmanifest">
@@ -484,7 +497,7 @@ input:focus,select:focus{border-color:var(--orange)}
         <div class="date-title">
           <h1 id="headerTitle">TODAY</h1>
           <div class="date-sub" id="headerDate"></div>
-          <div class="small" style="margin-top:4px">Drews Nutrition Tracker <span id="appVersion">v1.4.0</span></div>
+          <div class="small" style="margin-top:4px">Drews Nutrition Tracker <span id="appVersion">v1.4.2</span></div>
         </div>
         <button class="icon-btn" onclick="changeDay(1)">›</button>
       </div>
@@ -507,7 +520,7 @@ input:focus,select:focus{border-color:var(--orange)}
       <div class="mobile-weight-summary">
         <div class="mobile-weight-title">
           <b>WEIGHT</b>
-          <button class="dark-btn" onclick="focusWeight()" style="padding:6px 9px;font-size:10px">+ LOG</button>
+          <button class="dark-btn" onclick="openWeightModal()" style="padding:6px 9px;font-size:10px">+ LOG</button>
         </div>
         <div class="mobile-weight-grid">
           <div class="mobile-weight-box am">
@@ -661,7 +674,7 @@ input:focus,select:focus{border-color:var(--orange)}
           <button onclick="setRange(30,this)">30 Days</button>
           <button onclick="setRange(90,this)">90 Days</button>
         </div>
-        <div class="progress-chart-wrap" style="height:360px"><canvas id="progressChart"></canvas></div>
+        <div class="progress-chart-wrap" style="height:360px"><canvas id="progressChart"></canvas><div class="graph-empty" id="graphEmpty">Log data to build this graph.</div></div>
         <div class="graph-caption" id="graphCaption"></div>
       </div>
       <div class="card">
@@ -733,6 +746,25 @@ input:focus,select:focus{border-color:var(--orange)}
   </main>
 </div>
 
+
+<div id="weightModal" class="weight-modal" onclick="if(event.target===this)closeWeightModal()">
+  <div class="weight-modal-card">
+    <div class="weight-modal-head">
+      <div><h3>LOG DAILY WEIGHT</h3><div class="small" id="weightModalDate"></div></div>
+      <button class="weight-modal-close" onclick="closeWeightModal()">×</button>
+    </div>
+    <div class="weight-modal-grid">
+      <div><label>☀ MORNING • BEFORE MEALS</label><input id="modalMorningWeight" type="number" inputmode="decimal" step="0.1" placeholder="Morning lb" oninput="updateModalWeightDifference()"></div>
+      <div><label>☾ NIGHT • AFTER MEALS</label><input id="modalNightWeight" type="number" inputmode="decimal" step="0.1" placeholder="Night lb" oninput="updateModalWeightDifference()"></div>
+    </div>
+    <div class="small" id="modalWeightDiff" style="margin-top:10px;text-align:center"></div>
+    <div class="weight-modal-actions">
+      <button class="dark-btn" onclick="closeWeightModal()">Cancel</button>
+      <button class="primary-btn" onclick="saveWeightModal()">Save Weight</button>
+    </div>
+  </div>
+</div>
+
 <div class="mobile-nav">
   <button class="active" data-tab="log" onclick="showTab('log',this)">Today</button>
   <button data-tab="calendar" onclick="showTab('calendar',this)">Calendar</button>
@@ -743,7 +775,7 @@ input:focus,select:focus{border-color:var(--orange)}
 
 <script>
 
-const APP_VERSION = '1.4.0';
+const APP_VERSION = '1.4.2';
 const builtInFoodImages = {
   eggs3toast:'./food-eggs3toast.jpg',
   groundchickenrice:'./food-groundchickenrice.jpg',
@@ -875,7 +907,11 @@ function loadDate(k){activeDate=k;updateHeader();renderLog()}
 function changeDay(delta){
   let d=new Date(activeDate+'T12:00:00');d.setDate(d.getDate()+delta);loadDate(dateKey(d))
 }
-function focusWeight(){document.getElementById('weightInput').focus();document.getElementById('weightInput').scrollIntoView({behavior:'smooth',block:'center'})}
+function focusWeight(){
+  if(window.matchMedia('(max-width:780px)').matches){openWeightModal();return;}
+  const input=document.getElementById('weightInput');
+  if(input){input.focus();input.scrollIntoView({behavior:'smooth',block:'center'});}
+}
 
 function renderLog(){
   updateHeader();
@@ -939,58 +975,71 @@ function previousWeight(k){
 }
 function renderWeightCard(){
   const am=weights[activeDate], pm=nightWeights[activeDate];
-  weightDisplay.innerHTML=am?`${Number(am).toFixed(1)} <span>lbs</span>`:`— <span>lbs</span>`;
-  nightWeightDisplay.innerHTML=pm?`${Number(pm).toFixed(1)} <span>lbs</span>`:`— <span>lbs</span>`;
-  weightInput.value=am??'';
-  nightWeightInput.value=pm??'';
-  if(am&&pm){
-    const diff=Number(pm)-Number(am);
-    weightChange.innerHTML=`AM → PM difference: <b style="color:var(--orange)">${diff>=0?'+':''}${diff.toFixed(1)} lb</b>`;
-  } else if(am) weightChange.textContent='Morning saved. Add your night weight after meals.';
-  else if(pm) weightChange.textContent='Night saved. Add a morning weight for comparison.';
-  else weightChange.textContent='Log morning before meals and night after meals.';
+  const desktopAm=document.getElementById('weightDisplay'), desktopPm=document.getElementById('nightWeightDisplay');
+  const desktopChange=document.getElementById('weightChange'), desktopAmInput=document.getElementById('weightInput'), desktopPmInput=document.getElementById('nightWeightInput');
 
-  const keys=dateKeys(7), amVals=keys.map(k=>weights[k]??null), pmVals=keys.map(k=>nightWeights[k]??null);
-  if(miniWeightChart)miniWeightChart.destroy();
-  miniWeightChart=new Chart(document.getElementById('miniWeightChart'),{
-    type:'line',
-    data:{labels:keys.map(shortDate),datasets:[
-      {label:'Morning',data:amVals,borderColor:'#ff6a00',backgroundColor:'transparent',tension:.35,spanGaps:true,pointRadius:2},
-      {label:'Night',data:pmVals,borderColor:'#9f3cff',backgroundColor:'transparent',tension:.35,spanGaps:true,pointRadius:2}
-    ]},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,labels:{color:'#9aa5b1',boxWidth:10,font:{size:9}}}},scales:{x:{ticks:{color:'#75808b',font:{size:9}},grid:{display:false}},y:{beginAtZero:false,ticks:{color:'#75808b',font:{size:9}},grid:{color:'#1b232c'}}}}
-  });
-}
-function saveDailyWeights(){
-  const am=parseFloat(weightInput.value), pm=parseFloat(nightWeightInput.value);
-  if(am>0) weights[activeDate]=am;
-  if(pm>0) nightWeights[activeDate]=pm;
-  if(!(am>0)&&!(pm>0)){alert('Enter a morning weight, night weight, or both.');return}
-  save();renderLog();
-  const mobileAm=document.getElementById('mobileAmWeight');
-  const mobilePm=document.getElementById('mobilePmWeight');
-  const mobileDiff=document.getElementById('mobileWeightDiff');
+  if(desktopAm) desktopAm.innerHTML=am?`${Number(am).toFixed(1)} <span>lbs</span>`:`— <span>lbs</span>`;
+  if(desktopPm) desktopPm.innerHTML=pm?`${Number(pm).toFixed(1)} <span>lbs</span>`:`— <span>lbs</span>`;
+  if(desktopAmInput) desktopAmInput.value=am??'';
+  if(desktopPmInput) desktopPmInput.value=pm??'';
+  if(desktopChange){
+    if(am&&pm){const diff=Number(pm)-Number(am);desktopChange.innerHTML=`AM → PM difference: <b style="color:var(--orange)">${diff>=0?'+':''}${diff.toFixed(1)} lb</b>`;}
+    else if(am) desktopChange.textContent='Morning saved. Add your night weight after meals.';
+    else if(pm) desktopChange.textContent='Night saved. Add a morning weight for comparison.';
+    else desktopChange.textContent='Log morning before meals and night after meals.';
+  }
+
+  const mobileAm=document.getElementById('mobileAmWeight'), mobilePm=document.getElementById('mobilePmWeight'), mobileDiff=document.getElementById('mobileWeightDiff');
   if(mobileAm) mobileAm.textContent=am?`${Number(am).toFixed(1)} lbs`:'—';
   if(mobilePm) mobilePm.textContent=pm?`${Number(pm).toFixed(1)} lbs`:'—';
   if(mobileDiff){
-    if(am&&pm){
-      const d=Number(pm)-Number(am);
-      mobileDiff.textContent=`${d>=0?'+':''}${d.toFixed(1)} lbs`;
-    }else mobileDiff.textContent='—';
+    if(am&&pm){const diff=Number(pm)-Number(am);mobileDiff.textContent=`${diff>=0?'+':''}${diff.toFixed(1)} lbs`;}
+    else mobileDiff.textContent='—';
+  }
+
+  const keys=dateKeys(7), amVals=keys.map(k=>weights[k]??null), pmVals=keys.map(k=>nightWeights[k]??null);
+  const miniCanvas=document.getElementById('miniWeightChart');
+  if(miniCanvas){
+    if(miniWeightChart) miniWeightChart.destroy();
+    miniWeightChart=new Chart(miniCanvas,{type:'line',data:{labels:keys.map(shortDate),datasets:[
+      {label:'Morning',data:amVals,borderColor:'#ff6a00',backgroundColor:'transparent',tension:.3,spanGaps:true,pointRadius:2,borderWidth:2},
+      {label:'Night',data:pmVals,borderColor:'#9f3cff',backgroundColor:'transparent',tension:.3,spanGaps:true,pointRadius:2,borderWidth:2}
+    ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,labels:{color:'#9aa5b1',boxWidth:10,font:{size:9}}}},scales:{x:{ticks:{color:'#75808b',font:{size:9}},grid:{display:false}},y:{beginAtZero:false,ticks:{color:'#75808b',font:{size:9}},grid:{color:'#1b232c'}}}}});
   }
   const spark=document.getElementById('mobileWeightSpark');
   if(spark){
     if(mobileWeightChart) mobileWeightChart.destroy();
-    mobileWeightChart=new Chart(spark,{
-      type:'line',
-      data:{labels:keys.map(shortDate),datasets:[
-        {data:amVals,borderColor:'#ff6a00',backgroundColor:'transparent',tension:.35,spanGaps:true,pointRadius:0,borderWidth:2},
-        {data:pmVals,borderColor:'#9f3cff',backgroundColor:'transparent',tension:.35,spanGaps:true,pointRadius:0,borderWidth:2}
-      ]},
-      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{display:false},y:{display:false}}}
-    });
+    mobileWeightChart=new Chart(spark,{type:'line',data:{labels:keys.map(shortDate),datasets:[
+      {data:amVals,borderColor:'#ff6a00',backgroundColor:'transparent',tension:.3,spanGaps:true,pointRadius:0,borderWidth:2},
+      {data:pmVals,borderColor:'#9f3cff',backgroundColor:'transparent',tension:.3,spanGaps:true,pointRadius:0,borderWidth:2}
+    ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{enabled:false}},scales:{x:{display:false},y:{display:false}},animation:false}});
   }
-
+}
+function openWeightModal(){
+  const modal=document.getElementById('weightModal');if(!modal)return;
+  document.getElementById('weightModalDate').textContent=fmtDate(activeDate);
+  document.getElementById('modalMorningWeight').value=weights[activeDate]??'';
+  document.getElementById('modalNightWeight').value=nightWeights[activeDate]??'';
+  updateModalWeightDifference();modal.classList.add('open');document.body.style.overflow='hidden';
+}
+function closeWeightModal(){document.getElementById('weightModal')?.classList.remove('open');document.body.style.overflow='';}
+function updateModalWeightDifference(){
+  const am=parseFloat(document.getElementById('modalMorningWeight')?.value), pm=parseFloat(document.getElementById('modalNightWeight')?.value), el=document.getElementById('modalWeightDiff');
+  if(!el)return;
+  if(am>0&&pm>0){const diff=pm-am;el.innerHTML=`AM → PM difference: <b style="color:var(--green)">${diff>=0?'+':''}${diff.toFixed(1)} lb</b>`;}
+  else el.textContent='You can save morning, night, or both.';
+}
+function saveWeightModal(){
+  const am=parseFloat(document.getElementById('modalMorningWeight').value), pm=parseFloat(document.getElementById('modalNightWeight').value);
+  if(!(am>0)&&!(pm>0)){alert('Enter a morning weight, night weight, or both.');return;}
+  if(am>0) weights[activeDate]=am;if(pm>0) nightWeights[activeDate]=pm;
+  save();closeWeightModal();renderLog();if(document.getElementById('progress')?.classList.contains('active'))renderProgress();
+}
+function saveDailyWeights(){
+  const am=parseFloat(document.getElementById('weightInput')?.value), pm=parseFloat(document.getElementById('nightWeightInput')?.value);
+  if(!(am>0)&&!(pm>0)){alert('Enter a morning weight, night weight, or both.');return;}
+  if(am>0) weights[activeDate]=am;if(pm>0) nightWeights[activeDate]=pm;
+  save();renderLog();if(document.getElementById('progress')?.classList.contains('active'))renderProgress();
 }
 function saveWeight(){saveDailyWeights();}
 function miniChartOptions(beginAtZero=true){
@@ -1024,10 +1073,6 @@ function renderStreak(){
     else break;
   }
   streakNum.textContent=streak;
-}
-function saveWeight(){
-  const v=parseFloat(weightInput.value); if(!v||v<=0){alert('Enter a valid weight.');return}
-  weights[activeDate]=v;save();renderLog()
 }
 function copyPreviousDay(){
   let d=new Date(activeDate+'T12:00:00');d.setDate(d.getDate()-1);const prev=dateKey(d);
@@ -1101,16 +1146,18 @@ function jumpToHistoryDate(){if(historyDate.value){showTab('log',document.queryS
 function setGraphView(view,btn){
   graphView=view;
   document.querySelectorAll('#graphViewControls button').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
+  if(btn)btn.classList.add('active');
   const metricControls=document.getElementById('metricControls');
-  if(metricControls) metricControls.style.opacity=view==='combined'?'.45':'1';
+  if(metricControls){metricControls.style.opacity=view==='combined'?'.42':'1';metricControls.style.pointerEvents=view==='combined'?'none':'auto';}
   renderProgress();
 }
 
 function setMetric(metric,btn){
+  if(graphView==='combined')return;
   selectedMetric=metric;
-  document.querySelectorAll('#metricControls button').forEach(b=>b.classList.remove('active'));btn.classList.add('active');
-  renderProgress()
+  document.querySelectorAll('#metricControls button').forEach(b=>b.classList.remove('active'));
+  if(btn)btn.classList.add('active');
+  renderProgress();
 }
 function setRange(n,btn){
   rangeDays=n;
@@ -1128,114 +1175,54 @@ function valueForMetric(k){
   return totalsFor(k)[selectedMetric]
 }
 function renderProgress(){
-  const keys=dateKeys(rangeDays);
-  const labels=keys.map(shortDate);
-  const caption=document.getElementById('graphCaption');
+  const canvas=document.getElementById('progressChart');if(!canvas)return;
+  const keys=dateKeys(rangeDays), labels=keys.map(shortDate), caption=document.getElementById('graphCaption'), empty=document.getElementById('graphEmpty');
+  if(progressChart){progressChart.destroy();progressChart=null;}if(empty)empty.style.display='none';
 
-  if(progressChart)progressChart.destroy();
+  const base={responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},animation:{duration:250},plugins:{legend:{labels:{color:'#cbd3db',boxWidth:10,usePointStyle:true}},tooltip:{enabled:true}}};
 
   if(graphView==='combined'){
-    const am=keys.map(k=>weights[k]??null);
-    const pm=keys.map(k=>nightWeights[k]??null);
-    const cals=keys.map(k=>totalsFor(k).cal||0);
-
-    progressChart=new Chart(document.getElementById('progressChart'),{
-      data:{
-        labels,
-        datasets:[
-          {type:'line',label:'Morning Weight',data:am,borderColor:'#ff6a00',backgroundColor:'transparent',tension:.3,spanGaps:true,pointRadius:2,borderWidth:3,yAxisID:'y'},
-          {type:'line',label:'Night Weight',data:pm,borderColor:'#9f3cff',backgroundColor:'transparent',tension:.3,spanGaps:true,pointRadius:2,borderWidth:3,yAxisID:'y'},
-          {type:'bar',label:'Calories',data:cals,backgroundColor:'rgba(91,224,43,.42)',borderColor:'#5be02b',borderWidth:1,yAxisID:'y1'}
-        ]
-      },
-      options:{
-        responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
-        plugins:{legend:{labels:{color:'#cbd3db',boxWidth:10}}},
-        scales:{
-          x:{ticks:{color:'#8f9aa7'},grid:{color:'#18212a'}},
-          y:{position:'left',beginAtZero:false,ticks:{color:'#8f9aa7'},grid:{color:'#18212a'},title:{display:true,text:'Weight (lb)',color:'#8f9aa7'}},
-          y1:{position:'right',beginAtZero:true,ticks:{color:'#5be02b'},grid:{drawOnChartArea:false},title:{display:true,text:'Calories',color:'#5be02b'}}
-        }
-      }
-    });
-
-    const w=[...am,...pm].filter(v=>v!==null&&v!==undefined);
-    const validCals=cals.filter(v=>v>0);
-    const avgW=w.length?w.reduce((a,b)=>a+b,0)/w.length:0;
-    const avgC=validCals.length?validCals.reduce((a,b)=>a+b,0)/validCals.length:0;
-    const firstAm=am.find(v=>v!==null&&v!==undefined);
-    const lastAm=[...am].reverse().find(v=>v!==null&&v!==undefined);
-    progressStats.innerHTML=`
-      <div class="stat"><b>${avgW?avgW.toFixed(1):'—'} lb</b><span>AVG WEIGHT</span></div>
-      <div class="stat"><b>${avgC?Math.round(avgC):'—'} kcal</b><span>AVG CALORIES</span></div>
-      <div class="stat"><b>${firstAm&&lastAm?`${lastAm-firstAm>=0?'+':''}${(lastAm-firstAm).toFixed(1)} lb`:'—'}</b><span>MORNING TREND</span></div>`;
-    if(caption)caption.textContent='Combined view compares morning/night weight with calorie intake so you can see how nutrition and body-weight trends move together.';
-    return;
+    const am=keys.map(k=>weights[k]??null),pm=keys.map(k=>nightWeights[k]??null),cals=keys.map(k=>totalsFor(k).count>0?Math.round(totalsFor(k).cal):null);
+    if(![...am,...pm,...cals].some(v=>v!==null)){if(empty)empty.style.display='flex';progressStats.innerHTML='<div class="small">Log weight and meals to use the combined view.</div>';if(caption)caption.textContent='Combined view compares AM/PM body weight with calorie intake.';return;}
+    progressChart=new Chart(canvas,{data:{labels,datasets:[
+      {type:'line',label:'Morning Weight',data:am,borderColor:'#ff6a00',backgroundColor:'#ff6a00',tension:.28,spanGaps:true,pointRadius:3,borderWidth:3,yAxisID:'weightAxis',order:1},
+      {type:'line',label:'Night Weight',data:pm,borderColor:'#9f3cff',backgroundColor:'#9f3cff',tension:.28,spanGaps:true,pointRadius:3,borderWidth:3,yAxisID:'weightAxis',order:1},
+      {type:'bar',label:'Calories',data:cals,backgroundColor:'rgba(91,224,43,.32)',borderColor:'#5be02b',borderWidth:1,borderRadius:4,yAxisID:'calAxis',order:2}
+    ]},options:{...base,scales:{
+      x:{ticks:{color:'#8f9aa7',maxRotation:0,autoSkip:true,maxTicksLimit:7},grid:{color:'#18212a'}},
+      weightAxis:{position:'left',beginAtZero:false,ticks:{color:'#c1c8d0'},grid:{color:'#18212a'},title:{display:true,text:'Weight (lb)',color:'#8f9aa7'}},
+      calAxis:{position:'right',beginAtZero:true,ticks:{color:'#5be02b'},grid:{drawOnChartArea:false},title:{display:true,text:'Calories',color:'#5be02b'}}
+    }}});
+    const mv=am.filter(v=>v!==null),nv=pm.filter(v=>v!==null),cv=cals.filter(v=>v!==null),all=[...mv,...nv];
+    const aw=all.length?all.reduce((a,b)=>a+b,0)/all.length:null,ac=cv.length?cv.reduce((a,b)=>a+b,0)/cv.length:null,tr=mv.length>1?mv[mv.length-1]-mv[0]:null;
+    progressStats.innerHTML=`<div class="stat"><b>${aw!==null?aw.toFixed(1):'—'} lb</b><span>AVG WEIGHT</span></div><div class="stat"><b>${ac!==null?Math.round(ac):'—'} kcal</b><span>AVG CALORIES</span></div><div class="stat"><b>${tr!==null?`${tr>=0?'+':''}${tr.toFixed(1)} lb`:'—'}</b><span>AM TREND</span></div>`;
+    if(caption)caption.textContent='Weight + Calories uses two scales: AM/PM weight is shown as lines and daily calories as bars.';return;
   }
 
   if(selectedMetric==='weight'){
-    const am=keys.map(k=>weights[k]??null);
-    const pm=keys.map(k=>nightWeights[k]??null);
-    const isArea=graphView==='area';
-
-    progressChart=new Chart(document.getElementById('progressChart'),{
-      type:'line',
-      data:{labels,datasets:[
-        {label:'Morning Weight',data:am,borderColor:'#ff6a00',backgroundColor:isArea?'rgba(255,106,0,.22)':'transparent',fill:isArea?'+1':false,tension:.32,spanGaps:true,pointRadius:3,borderWidth:3},
-        {label:'Night Weight',data:pm,borderColor:'#9f3cff',backgroundColor:isArea?'rgba(159,60,255,.24)':'transparent',fill:isArea?'origin':false,tension:.32,spanGaps:true,pointRadius:3,borderWidth:3}
-      ]},
-      options:{
-        responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
-        plugins:{legend:{labels:{color:'#cbd3db',boxWidth:10}}},
-        scales:{
-          x:{ticks:{color:'#8f9aa7'},grid:{color:'#18212a'}},
-          y:{beginAtZero:false,ticks:{color:'#8f9aa7'},grid:{color:'#18212a'}}
-        }
-      }
-    });
-
-    const all=[...am,...pm].filter(v=>v!==null&&v!==undefined);
-    const amValid=am.filter(v=>v!==null&&v!==undefined),pmValid=pm.filter(v=>v!==null&&v!==undefined);
-    const avgAm=amValid.length?amValid.reduce((a,b)=>a+b,0)/amValid.length:null;
-    const avgPm=pmValid.length?pmValid.reduce((a,b)=>a+b,0)/pmValid.length:null;
-    const first=amValid[0],last=amValid[amValid.length-1];
-    progressStats.innerHTML=`
-      <div class="stat"><b>${avgAm!==null?avgAm.toFixed(1):'—'} lb</b><span>AVG MORNING</span></div>
-      <div class="stat"><b>${avgPm!==null?avgPm.toFixed(1):'—'} lb</b><span>AVG NIGHT</span></div>
-      <div class="stat"><b>${first!==undefined&&last!==undefined?`${last-first>=0?'+':''}${(last-first).toFixed(1)} lb`:'—'}</b><span>CHANGE</span></div>`;
-    if(caption)caption.textContent=isArea
-      ?'Area view emphasizes the daily range between morning and night weight, making repeated patterns easier to spot.'
-      :'Line view is the cleanest way to compare morning and night weight trends over time.';
-    return;
+    const am=keys.map(k=>weights[k]??null),pm=keys.map(k=>nightWeights[k]??null),area=graphView==='area';
+    if(![...am,...pm].some(v=>v!==null)){if(empty)empty.style.display='flex';progressStats.innerHTML='<div class="small">No weight entries in this date range yet.</div>';if(caption)caption.textContent=area?'Area view will highlight the gap between morning and night weights.':'Line view will compare morning and night weight trends.';return;}
+    const datasets=area?[
+      {label:'Night Weight',data:pm,borderColor:'#9f3cff',backgroundColor:'rgba(159,60,255,.12)',tension:.28,spanGaps:true,pointRadius:3,borderWidth:2,fill:false},
+      {label:'Morning Weight',data:am,borderColor:'#ff6a00',backgroundColor:'rgba(255,106,0,.24)',tension:.28,spanGaps:true,pointRadius:3,borderWidth:2,fill:'-1'}
+    ]:[
+      {label:'Morning Weight',data:am,borderColor:'#ff6a00',backgroundColor:'#ff6a00',tension:.28,spanGaps:true,pointRadius:3,borderWidth:3,fill:false},
+      {label:'Night Weight',data:pm,borderColor:'#9f3cff',backgroundColor:'#9f3cff',tension:.28,spanGaps:true,pointRadius:3,borderWidth:3,fill:false}
+    ];
+    progressChart=new Chart(canvas,{type:'line',data:{labels,datasets},options:{...base,scales:{x:{ticks:{color:'#8f9aa7',maxRotation:0,autoSkip:true,maxTicksLimit:7},grid:{color:'#18212a'}},y:{beginAtZero:false,ticks:{color:'#8f9aa7'},grid:{color:'#18212a'}}}}});
+    const av=am.filter(v=>v!==null),pv=pm.filter(v=>v!==null),aa=av.length?av.reduce((a,b)=>a+b,0)/av.length:null,ap=pv.length?pv.reduce((a,b)=>a+b,0)/pv.length:null,tr=av.length>1?av[av.length-1]-av[0]:null;
+    progressStats.innerHTML=`<div class="stat"><b>${aa!==null?aa.toFixed(1):'—'} lb</b><span>AVG MORNING</span></div><div class="stat"><b>${ap!==null?ap.toFixed(1):'—'} lb</b><span>AVG NIGHT</span></div><div class="stat"><b>${tr!==null?`${tr>=0?'+':''}${tr.toFixed(1)} lb`:'—'}</b><span>AM CHANGE</span></div>`;
+    if(caption)caption.textContent=area?'Area view shades the gap between morning and night measurements so your daily range is easy to see.':'Line view keeps AM and PM weights separate for a clean long-term trend.';return;
   }
 
   const meta={cal:['Calories','kcal','#ff6a00'],p:['Protein','g','#5be02b'],c:['Carbs','g','#168cff'],f:['Fat','g','#9f3cff']}[selectedMetric];
-  const vals=keys.map(k=>totalsFor(k)[selectedMetric]);
-  const isArea=graphView==='area';
-  progressChart=new Chart(document.getElementById('progressChart'),{
-    type:'line',
-    data:{labels,datasets:[{
-      label:`${meta[0]} (${meta[1]})`,data:vals,borderColor:meta[2],
-      backgroundColor:isArea?meta[2]+'33':'transparent',fill:isArea,tension:.3,pointRadius:3,borderWidth:3
-    }]},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#cbd3db'}}},scales:{
-      x:{ticks:{color:'#8f9aa7'},grid:{color:'#18212a'}},
-      y:{beginAtZero:true,ticks:{color:'#8f9aa7'},grid:{color:'#18212a'}}
-    }}
-  });
-
-  const valid=vals.filter(v=>v>0);
-  if(!valid.length){progressStats.innerHTML='<div class="small">No data in this range yet.</div>';return}
+  const vals=keys.map(k=>totalsFor(k).count>0?totalsFor(k)[selectedMetric]:null),valid=vals.filter(v=>v!==null),area=graphView==='area';
+  if(!valid.length){if(empty)empty.style.display='flex';progressStats.innerHTML=`<div class="small">No ${meta[0].toLowerCase()} data in this date range yet.</div>`;if(caption)caption.textContent=`Log meals to build your ${meta[0].toLowerCase()} trend.`;return;}
+  progressChart=new Chart(canvas,{type:'line',data:{labels,datasets:[{label:`${meta[0]} (${meta[1]})`,data:vals,borderColor:meta[2],backgroundColor:area?meta[2]+'38':meta[2],fill:area,tension:.28,spanGaps:true,pointRadius:3,borderWidth:3}]},options:{...base,scales:{x:{ticks:{color:'#8f9aa7',maxRotation:0,autoSkip:true,maxTicksLimit:7},grid:{color:'#18212a'}},y:{beginAtZero:true,ticks:{color:'#8f9aa7'},grid:{color:'#18212a'}}}}});
   const avg=valid.reduce((a,b)=>a+b,0)/valid.length,min=Math.min(...valid),max=Math.max(...valid);
-  progressStats.innerHTML=`
-    <div class="stat"><b>${avg.toFixed(0)} ${meta[1]}</b><span>AVERAGE</span></div>
-    <div class="stat"><b>${min.toFixed(0)} ${meta[1]}</b><span>LOWEST</span></div>
-    <div class="stat"><b>${max.toFixed(0)} ${meta[1]}</b><span>HIGHEST</span></div>`;
-  if(caption)caption.textContent=isArea
-    ?`Area view makes the overall ${meta[0].toLowerCase()} pattern easier to see across the selected range.`
-    :`Line view shows your ${meta[0].toLowerCase()} trend cleanly over time.`;
+  progressStats.innerHTML=`<div class="stat"><b>${avg.toFixed(0)} ${meta[1]}</b><span>AVERAGE</span></div><div class="stat"><b>${min.toFixed(0)} ${meta[1]}</b><span>LOWEST</span></div><div class="stat"><b>${max.toFixed(0)} ${meta[1]}</b><span>HIGHEST</span></div>`;
+  if(caption)caption.textContent=area?`Area view emphasizes the overall shape of your ${meta[0].toLowerCase()} intake.`:`Line view shows your ${meta[0].toLowerCase()} trend day by day.`;
 }
-
 let deferredInstallPrompt = null;
 
 function buildBackupPayload(){
@@ -1406,6 +1393,7 @@ async function applyAppUpdate(){
     if(reg?.waiting)reg.waiting.postMessage({type:'SKIP_WAITING'}); else {if(reg)await reg.update(); location.reload();}
   }catch(e){location.reload();}
 }
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeWeightModal();});
 if('serviceWorker' in navigator){navigator.serviceWorker.addEventListener('controllerchange',()=>location.reload());}
 
 renderLog();
